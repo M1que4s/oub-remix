@@ -25,20 +25,32 @@ from telethon.tl.types import (
 from userbot import CMD_HELP, bot
 from userbot.events import register
 
+from re import match, sub
+
 combot_stickers_url = "https://combot.org/telegram/stickers?q="
 
 KANGING_STR = [
     "Stealing this sticker...",
+    "Using Witchery to kang this sticker...",
     "Plagiarising hehe...",
     "Inviting this sticker over to my pack...",
-    "Kanging this sticker...",]
+    "Kanging this sticker...",
+    "Hey that's a nice sticker!\nMind if I kang?!..",
+    "hehe me stel ur stikér\nhehe.",
+    "Ay look over there (☉｡☉)!→\nWhile I kang this...",
+    "Roses are red violets are blue, kanging this sticker so my pacc looks cool",
+    "Imprisoning this sticker...",
+    "Mr.Steal Your Sticker is stealing this sticker... ",
+]
+
+def ToBool(str):
+    return str.lower() in [ "yes", "si", "true" ]
 
 @register(outgoing=True, pattern="^.kang")
 async def kang(args):
     """ For .kang command, kangs stickers or creates new ones. """
     user = await bot.get_me()
-    if not user.username:
-        user.username = user.first_name
+    user.username = user.first_name
     message = await args.get_reply_message()
     photo = None
     emojibypass = False
@@ -74,32 +86,106 @@ async def kang(args):
             is_anim = True
             photo = 1
         else:
-            await args.edit("`Unsupported File!`")
+            await args.edit("`Unsupported File!`", parse_mode="md")
             return
     else:
-        await args.edit("`Couldn't download sticker! Make sure you send a proper sticker/photo.`")
+        await args.edit("`Couldn't download sticker! Make sure you send a proper sticker/photo.`", parse_mode="md")
         return
 
     if photo:
         splat = args.text.split()
-        if not emojibypass:
-            emoji = "😃"
-        pack = 1
-        if len(splat) == 3:
-            pack = splat[2]  # User sent both
-            emoji = splat[1]
-        elif len(splat) == 2:
-            if splat[1].isnumeric():
-                # User wants to push into different pack, but is okay with
-                # thonk as emote.
-                pack = int(splat[1])
-            else:
-                # User sent just custom emote, wants to push to default
-                # pack
-                emoji = splat[1]
 
-        packname = f"a{user.id}_by_{user.username}_{pack}"
-        packnick = f"@{user.username}'s remix pack Vol.{pack}"
+        if not emojibypass: emoji = "⭐️"
+
+        pack = "Kang"
+        vol = 1
+        username = True
+        patt = {
+            "num": r'^(\d+)$',
+            "text": r'([\w\-\\\{\}\[\]\"\'\~\$\@\!\¡\|\¬\¿\?\.\:\,\;\·\#\%\&\/\=\ª\º\^\`\´\+\*\¨\€\ł\ĸ\æ\«\»\¢\“\”\µ\ŋ\ß\¶\ŧ\←\↓\↑\→]+)',
+            "notext": r'[^A-Za-z0-9]'
+        }
+
+        splat_len = len(splat)
+
+        # User sends 0 argument. Example:
+        # .kang
+        if splat_len == 1:
+            await args.edit("`Info: using all default values`", parse_mode="md")
+
+        # User sends 1 argument. Examples:
+        # .kang EMOJI
+        # .kang PACK_VOL
+        # .kang PACK_NAME
+        # and wants:
+        elif splat_len == 2:
+            # to put the sticker in other pack but using the default values of emoji and vol
+            if match(patt["text"], splat[1]): pack = splat[1]
+
+            # to put the sticker in other vol but using the default values of emoji and pack
+            elif match(patt["num"], splat[1]): vol = splat[1]
+
+            # to use the default sticker and is ok using the default values of pack and vol
+            else: emoji = splat[1]
+
+        # User sends 2 argument. Examples:
+        # .kang EMOJI PACK_NAME
+        # .kang EMOJI PACK_VOL
+        elif splat_len == 3:
+            emoji = splat[1]
+
+            if match(patt["text"], splat[2]):
+                pack = splat[2]
+
+            elif match(patt["num"], splat[2]):
+                vol = splat[2]
+
+            else:
+                await args.edit(f"`Unknow argument: '{splat[2]}' @ splat[2] (position 3)`")
+                return
+
+        # User sends 3 argument. Example:
+        # .kang EMOJI PACK_NAME PACK_VOL
+        elif splat_len == 4:
+            emoji = splat[1]
+            pack = splat[2]
+            vol = splat[3]
+
+        # User sends 4 argument. Example:
+        # .kang EMOJI PACK_NAME PACK_VOL USER_NAME
+        elif splat_len == 5:
+            emoji = splat[1]
+            pack = splat[2]
+            vol = splat[3]
+
+            if ToBool(splat[4]): username = ToBool(splat[4])
+            elif match(patt["text"], splat[4]): username = splat[4]
+            else: username = False
+
+        # User sends 5 argument or more. Example:
+        # .kang EMOJI PACK NAME PACK_VOL USER_NAME
+        elif splat_len == 6:
+            emoji = splat[1]
+            pack = " ".join(splat[2:-2])
+            vol = splat[-2]
+
+            if ToBool(splat[-1]): username = ToBool(splat[-1])
+            elif match(patt["text"], splat[-1]): username = splat[-1]
+            else: username = False
+
+        packname = ""
+        packnick = ""
+        
+        if (type(username) is type(True)) and username is True:
+            packname = f"{sub(patt['notext'], '_', user.username)}_{sub(patt['notext'], '_', pack)}_{vol}"
+            packnick = f"{user.username} {pack} Pack Vol. {vol}"
+        elif type(username) is type(""):
+            packname = f"{sub(patt['notext'], '_', username)}_{sub(patt['notext'], '_', pack)}_{vol}"
+            packnick = f"{username} {pack} Pack Vol. {vol}"
+        else:
+            packname = f"{sub(patt['notext'], '_', pack)}_{vol}"
+            packnick = f"{pack} Pack Vol. {vol}"
+        
         cmd = "/newpack"
         file = io.BytesIO()
 
@@ -108,7 +194,7 @@ async def kang(args):
             file.name = "sticker.png"
             image.save(file, "PNG")
         else:
-            packname += "_anim"
+            packname += "_Animated"
             packnick += " (Animated)"
             cmd = "/newanimated"
 
@@ -129,13 +215,23 @@ async def kang(args):
                 await conv.send_message(packname)
                 x = await conv.get_response()
                 while "120" in x.text:
-                    pack += 1
-                    packname = f"a{user.id}_by_{user.username}_{pack}"
-                    packnick = f"@{user.username}'s remix pack Vol.{pack}"
+                    vol += 1
+                    
+                    if (type(username) is type(True)) and username is True:
+                        packname = f"{sub(patt['notext'], '_', user.username)}_{sub(patt['notext'], '_', pack)}_{vol}"
+                        packnick = f"{user.username} {pack} Pack Vol. {vol}"
+                    elif type(username) is type(""):
+                        packname = f"{sub(patt['notext'], '_', username)}_{sub(patt['notext'], '_', pack)}_{vol}"
+                        packnick = f"{username} {pack} Pack Vol. {vol}"
+                    else:
+                        packname = f"{sub(patt['notext'], '_', pack)}_{vol}"
+                        packnick = f"{pack} Pack Vol. {vol}"
+                    
                     await args.edit(
                         "`Switching to Pack "
-                        + str(pack)
-                        + " due to insufficient space`"
+                        + str(pack) + " Vol " + str(vol)
+                        + " due to insufficient space`",
+                        parse_mode="md"
                     )
                     await conv.send_message(packname)
                     x = await conv.get_response()
@@ -192,7 +288,8 @@ async def kang(args):
                 rsp = await conv.get_response()
                 if "Sorry, the file type is invalid." in rsp.text:
                     await args.edit(
-                        "`Failed to add sticker, use` @Stickers `bot to add the sticker manually.`"
+                        "`Failed to add sticker, use` @Stickers `bot to add the sticker manually.`",
+                        parse_mode="md"
                     )
                     return
                 await conv.send_message(emoji)
@@ -380,22 +477,34 @@ async def sticker_to_png(sticker):
     return
 
 
-CMD_HELP.update(
-    {
-        "stickers": ".kang\
-\nUsage: Reply .kang to a sticker or an image to kang it to your userbot pack.\
-\n\n`.kang` [emoji('s)]\
-\nUsage: Works just like .kang but uses the emoji('s) you picked.\
-\n\n`.kang` [number]\
-\nUsage: Kang's the sticker/image to the specified pack but uses 😃 as emoji.\
-\n\n`.kang` [emoji('s)] [number]\
-\nUsage: Kang's the sticker/image to the specified pack and uses the emoji('s) you picked.\
-\n\n`.stkrinfo`\
-\nUsage: Gets info about the sticker pack.\
-\n\n`.getsticker`\
-\nUsage: reply to a sticker to get 'PNG' file of sticker.\
-\n\n`.cs <text>`\
-\nUsage: Type .cs text and generate rgb sticker.\
-\n\n`.stickers` <name of user or pack>\
-\nUsage: Fetch sticker Packs according to your query."
+CMD_HELP.update({
+    "stickers": """.kang
+Usage: Reply .kang to a sticker or an image to kang it to your userbot pack.
+
+.kang [emoji('s)]
+Usage: Works just like .kang but uses the emoji('s) you picked.
+
+.kang [number]
+Usage: Kang's the sticker/image to the specified pack vol but uses ⭐️ as emoji.
+
+.kang [name]
+Usage: Kang's the sticker/image to the specified pack name but uses ⭐️ as emoji.
+
+.kang [emoji('s)] [number]
+Usage: Kang's the sticker/image to the specified pack vol and uses the emoji('s) you picked.
+
+.kang [emoji('s)] [name]
+Usage: Kang's the sticker/image to the specified pack name and uses the emoji('s) you picked.
+
+.kang [emoji('s)] [name] [number]
+Usage: Kang's the sticker/image to the specified pack name, vol and uses the emoji('s) you picked.
+
+.kang [emoji('s)] [name] [number] [username]
+Usage: Kang's the sticker/image to the specified pack name, vol, uses the emoji('s) you picked and enable/disable put the username in the pack name.
+
+.stkrinfo
+Usage: Gets info about the sticker pack.
+
+.getsticker
+Usage: reply to a sticker to get 'PNG' file of sticker."""
 })
