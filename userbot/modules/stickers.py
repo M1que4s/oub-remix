@@ -481,30 +481,30 @@ CMD_HELP.update({
     "stickers": """.kang
 Usage: Reply .kang to a sticker or an image to kang it to your userbot pack.
 
-.kang [emoji('s)]
+`.kang [emoji('s)]`
 Usage: Works just like .kang but uses the emoji('s) you picked.
 
-.kang [number]
+`.kang [number]`
 Usage: Kang's the sticker/image to the specified pack vol but uses ⭐️ as emoji.
 
-.kang [name]
+`.kang [name]`
 Usage: Kang's the sticker/image to the specified pack name but uses ⭐️ as emoji.
 
-.kang [emoji('s)] [number]
+`.kang [emoji('s)] [number]`
 Usage: Kang's the sticker/image to the specified pack vol and uses the emoji('s) you picked.
 
-.kang [emoji('s)] [name]
+`.kang [emoji('s)] [name]`
 Usage: Kang's the sticker/image to the specified pack name and uses the emoji('s) you picked.
 
-.kang [emoji('s)] [name] [number]
+`.kang [emoji('s)] [name] [number]`
 Usage: Kang's the sticker/image to the specified pack name, vol and uses the emoji('s) you picked.
 
-.kang [emoji('s)] [name] [number] [username]
+`.kang [emoji('s)] [name] [number] [username]`
 Usage: Kang's the sticker/image to the specified pack name, vol, uses the emoji('s) you picked and enable/disable put the username in the pack name.
 
-.stkrinfo
+`.stkrinfo`
 Usage: Gets info about the sticker pack.
 
-.getsticker
+`.getsticker`
 Usage: reply to a sticker to get 'PNG' file of sticker."""
 })
