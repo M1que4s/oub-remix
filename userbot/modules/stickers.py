@@ -164,7 +164,7 @@ async def kang(args):
 
         # User sends 5 argument or more. Example:
         # .kang EMOJI PACK NAME PACK_VOL USER_NAME
-        elif splat_len == 6:
+        elif splat_len >= 6:
             emoji = splat[1]
             pack = " ".join(splat[2:-2])
             vol = splat[-2]
