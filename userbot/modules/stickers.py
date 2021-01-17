@@ -478,7 +478,7 @@ async def sticker_to_png(sticker):
 
 
 CMD_HELP.update({
-    "stickers": """.kang
+    "stickers": """`.kang`
 Usage: Reply .kang to a sticker or an image to kang it to your userbot pack.
 
 `.kang [emoji('s)]`
